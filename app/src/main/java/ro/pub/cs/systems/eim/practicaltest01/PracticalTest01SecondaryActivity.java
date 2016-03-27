@@ -17,10 +17,12 @@ public class PracticalTest01SecondaryActivity extends AppCompatActivity {
     private Button ok_button, cancel_button;
     private EditText editText3;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_practical_test01_secondary);
+
 
         Log.d("secondary_activity", "In onCreate second activity");
 
@@ -50,7 +52,5 @@ public class PracticalTest01SecondaryActivity extends AppCompatActivity {
         Log.d("secondary_activity", "total_clicks: "  + total_clicks);
         Log.d("secondary_activity", intent.getExtras().toString());
         editText3.setText(Integer.toString(total_clicks));
-
     }
-
 }

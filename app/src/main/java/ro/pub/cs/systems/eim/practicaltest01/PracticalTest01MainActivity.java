@@ -1,6 +1,9 @@
 package ro.pub.cs.systems.eim.practicaltest01;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,16 +23,40 @@ public class PracticalTest01MainActivity extends AppCompatActivity {
     private Button button1, button2, startIntentButton;
     private ButtonClickListener buttonClickListener = new ButtonClickListener();
 
+    private IntentFilter intentFilter = new IntentFilter();
+    private MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+
+    private class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("[MessageReceiver]", intent.getStringExtra("message"));
+        }
+    }
+
     private class ButtonClickListener implements View.OnClickListener {
         public void onClick(View view) {
-            Button b = (Button)view;
-            if (b == button1) {
-                int value = Integer.parseInt(editText1.getText().toString());
-                editText1.setText(Integer.toString(value + 1));
-            } else if (b == button2) {
-                int value = Integer.parseInt(editText2.getText().toString());
-                editText2.setText(Integer.toString(value + 1));
+            int value;
+            switch (view.getId()) {
+                case R.id.button1:
+                    value = Integer.parseInt(editText1.getText().toString());
+                    editText1.setText(Integer.toString(value + 1));
+                    break;
+                case R.id.button2:
+                    value = Integer.parseInt(editText2.getText().toString());
+                    editText2.setText(Integer.toString(value + 1));
+                    break;
             }
+
+            int value1 = Integer.parseInt(editText1.getText().toString());
+            int value2 = Integer.parseInt(editText2.getText().toString());
+
+            if (value1 + value2  > 10) {
+                Intent intent = new Intent(getApplicationContext(), PracticalTest01Service.class);
+                intent.putExtra("value1", value1);
+                intent.putExtra("value2", value2);
+                startService(intent);
+            }
+
         }
     }
 
@@ -63,6 +90,10 @@ public class PracticalTest01MainActivity extends AppCompatActivity {
             }
         });
 
+        for (String s : Constants.intentActions) {
+            intentFilter.addAction(s);
+        }
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -80,5 +111,24 @@ public class PracticalTest01MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle toRestore) {
         editText1.setText(toRestore.getString("editText1"));
         editText2.setText(toRestore.getString("editText2"));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(getApplicationContext(), PracticalTest01Service.class);
+        stopService(intent);
+        super.onDestroy();
     }
 }
